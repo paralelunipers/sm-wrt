@@ -68,5 +68,5 @@ jobs:
         with:
           name: openwrt-firmware-zte-e8820v2
           # Ambil hanya file sysupgrade dan factory untuk device ini
-          path: bin/targets/ramips/mt7621/*zte-e8820v2*
+          path: bin/targets/ramips/mt7621/*zte_e8820v2*
           if-no-files-found: error
