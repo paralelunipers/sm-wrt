@@ -32,8 +32,8 @@ jobs:
           sudo apt-get install -y \
             build-essential clang flex gawk gettext \
             git g++ libelf-dev libncurses5-dev \
-            libssl-dev python3 python2 python3-venv python-venv \
-            python3-pkg-resources python3-pyelftools python3-pip python3-ply libpython3-dev libpython-dev\
+            libssl-dev python3 python2 python3-venv \
+            python3-pkg-resources python3-pyelftools python3-pip python3-ply libpython3-dev \
             rsync subversion swig time unzip wget \
             zlib1g-dev file
 
