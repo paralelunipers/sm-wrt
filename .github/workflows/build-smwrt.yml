@@ -50,7 +50,9 @@ jobs:
       - name: Load custom .config from user-config directory
         run: |
           # Menyalin file konfigurasi lengkap dari lokasi yang ditentukan ke .config
-          cp user-config/config-zte-e8820v2 .config
+          # cp user-config/config-zte-e8820v2 .config
+          CONFIG_URL="https://raw.githubusercontent.com/paralelunipers/openwrt_8820v2/refs/heads/openwrt-23.05/productconfig/zte_e8820v2_defconfig"
+          wget -q --show-progress -O .config $CONFIG_URL
 
       # 5. Buat .config lengkap dan bersih (Wajib ada untuk mengatasi opsi NEW)
       - name: Generate full and clean .config
