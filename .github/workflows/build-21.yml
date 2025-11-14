@@ -53,7 +53,7 @@ jobs:
       # 5. Buat .config lengkap dan bersih (Wajib ada untuk mengatasi opsi NEW)
       - name: Generate full and clean .config
         run: |
-          make defconfig
+          FORCE=1 make defconfig
 
       # 6. Mulai proses build (ini akan lama)
       - name: Build firmware
