@@ -1,4 +1,4 @@
-name: Build OpenWrt (ZTE E8820V2)
+name: Build OpenWrt (ZTE E8820V2) V21.02
 
 on:
   # Izinkan run manual dari tab Actions
