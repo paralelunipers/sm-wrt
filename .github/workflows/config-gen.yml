@@ -1,0 +1,99 @@
+name: Generate OpenWrt Config & Package List
+
+on:
+  # Anda bisa menjalankan workflow ini secara manual dari GitHub UI
+  workflow_dispatch:
+    inputs:
+      openwrt_repo:
+        description: 'OpenWrt Source Repository (e.g., paralelunipers/sm-wrt)'
+        required: true
+        default: 'paralelunipers/sm-wrt'
+      openwrt_branch:
+        description: 'OpenWrt Branch/Ref (e.g., openwrt-21.02)'
+        required: true
+        default: 'main'
+      # Jika Anda punya file .config awal, tambahkan di sini
+      initial_config:
+        description: 'Optional: Initial .config content (Base Config)'
+        required: false
+        default: ''
+
+env:
+  # Tentukan target arsitektur Anda di sini (sesuaikan jika perlu)
+  TARGET_ARCH: 'mipsel_24kc' 
+
+jobs:
+  generate_config:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.inputs.openwrt_repo }}
+          ref: ${{ github.event.inputs.openwrt_branch }}
+          # Ambil submodules juga, ini penting untuk OpenWrt
+          submodules: true
+
+      - name: Set up build environment
+        run: |
+          # Instal dependensi dasar untuk build OpenWrt
+          sudo apt-get update
+          sudo apt-get install -y build-essential libncurses5-dev gawk git libssl-dev gettext zlib1g-dev swig python3 unzip rsync
+
+      - name: Update Feeds
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+        
+      - name: Prepare Initial .config
+        run: |
+          # 1. Salin config dasar. Ganti nama file ini dengan nama target device Anda
+          # Di sini, saya hanya membuat default config minimal untuk demonstrasi
+          cat << EOF > .config
+# Set Target dan Subtarget
+CONFIG_TARGET_ramips=y
+CONFIG_TARGET_ramips_mt7621=y 
+CONFIG_TARGET_ramips_mt7621_DEVICE_zte_e8820v2=y
+
+# Driver LAN (Contoh: MT7621 SoC Ethernet Driver - Ganti sesuai Device Anda!)
+# Anda harus mengetahui nama CONFIG_ yang benar untuk driver LAN Anda
+CONFIG_PACKAGE_kmod-mtk-soc-eth=y 
+
+# Fitur Dasar
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_firewall4=y
+CONFIG_PACKAGE_dnsmasq=y
+CONFIG_PACKAGE_dropbear=y
+
+# Tambahkan konfigurasi awal dari input jika ada
+${{ github.event.inputs.initial_config }}
+EOF
+        # Catatan: Bagian ini harus Anda sesuaikan di masa depan berdasarkan
+        # CONFIG_ TARGET dan CONFIG_PROFILE device spesifik Anda.
+        
+      - name: Apply Default Config (make defconfig)
+        id: defconfig
+        run: |
+          # make defconfig akan membersihkan dan melengkapi .config berdasarkan feed/source
+          make defconfig
+          # Simpan hasil akhir .config untuk diunggah
+          cp .config defconfig.final
+
+      - name: Generate Package Index (for checking available packages)
+        id: pkg_index
+        run: |
+          # Perintah ini menggenerate indeks paket yang terkompilasi
+          make package/index V=s > package_index_list.txt 
+        
+      - name: Upload .config Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openwrt-config-result
+          path: defconfig.final
+          
+      - name: Upload Package Index Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: available-package-index
+          path: package_index_list.txt
