@@ -36,8 +36,7 @@ jobs:
 
       # 5. Buat .config lengkap dan bersih (Wajib ada untuk mengatasi opsi NEW)
       - name: Generate full and clean .config
-        run: |
-          make defconfig
+        run: make defconfig
 		  
       - name: Upload buildinfo
         uses: actions/upload-artifact@main
