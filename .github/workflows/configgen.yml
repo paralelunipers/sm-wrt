@@ -1,0 +1,58 @@
+name: Build OpenWrt 24 
+
+on:
+  # Izinkan run manual dari tab Actions
+  workflow_dispatch:
+  # Otomatis build jika ada push ke branch main
+ 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+          
+      # 1. Checkout kode Anda
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install dependensi build yang diperlukan
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential clang flex gawk gettext \
+            git g++ libelf-dev libncurses5-dev \
+            libssl-dev python3 python3-venv \
+            python3-pkg-resources python3-pyelftools python3-pip python3-ply libpython3-dev\
+            rsync subversion swig time unzip wget \
+            zlib1g-dev file
+            
+      # 3. Update dan install feeds OpenWrt
+      - name: Update and install feeds
+        run: |
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      # 4. Salin file .config khusus (DIPERBARUI)
+      - name: Load custom .config from user-config directory
+        run: |
+          echo "CONFIG_TARGET_ramips=y" >> .config
+          echo "CONFIG_TARGET_ramips_mt7621=y" >> .config
+          echo "CONFIG_TARGET_ramips_mt7621_DEVICE_zte_e8820v2=y" >> .config
+
+      # 5. Buat .config lengkap dan bersih (Wajib ada untuk mengatasi opsi NEW)
+      - name: Generate full and clean .config
+        run: |
+          make defconfig
+		  
+      - name: Upload buildinfo
+        uses: actions/upload-artifact@main
+        with:
+          name: OpenWrt_config
+          path: ./artifact/buildinfo/
+
+      - name: Upload config
+        uses: actions/upload-artifact@main
+        with:
+          name: OpenWrt_package
+          path: openwrt/.config
