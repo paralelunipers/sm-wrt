@@ -1,16 +1,10 @@
-name: Build OpenWrt 24 
-
+name: Build config
 on:
-  # Izinkan run manual dari tab Actions
   workflow_dispatch:
-  # Otomatis build jika ada push ke branch main
- 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-latest    
     steps:
-          
       # 1. Checkout kode Anda
       - name: Checkout repository
         uses: actions/checkout@v4
